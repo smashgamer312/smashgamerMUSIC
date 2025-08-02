@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя музыкальная библиотека</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4cc9f0;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+        }
+        
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 10px 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        #search-input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        #search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .track-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .track-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .track-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #f72585;
+        }
+        
+        .track-player {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .no-tracks {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            grid-column: 1 / -1;
+        }
+        
+        @media (max-width: 768px) {
+            .music-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Моя музыкальная библиотека</h1>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Поиск треков...">
+        </div>
+        
+        <div class="music-grid" id="music-grid">
+            <div class="loading">Загрузка треков...</div>
+        </div>
+    </div>
+
+    <script>
+        const ACCESS_TOKEN = "sl.u.AF65M5RPuWL8s_RvSw_AO_3pfU4rmMKpVDju19ekyAzEtVgsvKsxO-3N6nzhOPFsgcCaYv6CoPvUEByMmZxa9o1zikX_0phVBbhc8DAV5WuEBVF8T80SW-V4w-pThXDq0iZ80qC_T9OAyG3ApVteOPiwYBQN10Jd4IsKDNxZV1xa-lRTiTHy00VVV7sP-8fG7fF1RN093P-RCNTb2fA6jka29zK3uE5O-3M18qWLHgI8w_zl41tWI1I4bUWNibNMgLH0jVDAKLPDdk8PN1o4B6Gx-j3qm8kjx0-PFRzMmn2BYjaLCqEWgz3i6S2xRJ8P7J7DkoOkcJnQy2y-5t_hd6L0t2oywAjgcF4Mgg8wUf2qXFNJnkKSfNFSdGYcL2wmTn7uLavGkQbpOo89ZXDRojGsNA6CjtRwyMRvc0Vab4l_f2haXM2Hu6Dk1gxmXV7PKvMth1zN6uOgt52zIimAt0LyPEkvtzO9vCeWSihxxR_pyao0mCDqxMlRTty2lTC37t0JufROchDWcF5BKBBLPBNsTRcMSTNfhR6m8x9uN-byEgUiECVe9ryXsVXf9owbUQW5VscI-WFdAt1KUxonJCoIz2loH2pq-HBmRbUIEkKSF1EGzLr70-SFNYsppd4zmjyivu0AFVTlGrCn9z-txeaVlffsoCcZ46SvXEYb_qIEbFMXy-h5aJodVslnPd1KKGdIAfvRyWt0POcMd2W9W1YzchQdCG0PgXli-P0p4-W0imOtbIbgBdFCe1etTkdpkyjjMwI-IL7E8_BHN_w5VdAlLLnUrJQJRCA-41KyUcD0Mh_1b65mM1b_My4jVIzmt3DS7b9dnO9QVe9QXRDcrvf-5EUqRFPUowQIAMYMFVRl-X10IqXb21QLeVcT0FacQwdtR6DJHuIgUOcycQIErjGs1GtUHo1AzmuHB2guv7Kvm9fQwIqy3BlwCbZ0HtVNCb7X-s_erKJqTLNkOeDsw9UA4RsxTDN89pw1JEtZdqLWbzayV11CHY3WLhbf-PyYZDJ6xF5yhyxF-BeLvfPqzTTycZFJY1Y5gXpnLBaoywCc1-gXOT5uQe8cuEX6v8Jse6fwDqtvJ2lFlabg48H2IEhOhJO2GAVPpneo33HxTVTO4IPKeCxB79vhNV7bVtVihUSv9Z6kwBO5WJ6JaJ_1YaIV7J220M8I3dadP5szAHGbstijsozNspngQx9krCymIriIUBGC7tJsdbmgYvin9xEJVV8tTFvPWji6QrAWfedXndUmLDmwsh1rINNxuxIgXOSkrSnq_apWLbSZv5E-M-saa_19DIv-0DQx0PKD15rYclediyWrsWERYu22Cs4zrWEy9t-K9hSOQr-NZajzgwb29WeNcSsupNwPWbJqj6qZ72B7iuLrk13ErIcaVOo7l3kcL8SmKJUne4zbzAFY2Vuu";
+        
+        async function fetchTracks() {
+            const musicGrid = document.getElementById('music-grid');
+            musicGrid.innerHTML = '<div class="loading">Загрузка треков...</div>';
+            
+            try {
+                const response = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        path: '',
+                        recursive: false,
+                        include_media_info: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.entries && data.entries.length > 0) {
+                    const audioFiles = data.entries.filter(file => 
+                        file.name.match(/\.(mp3|wav|ogg|m4a|flac)$/i)
+                    );
+                    
+                    if (audioFiles.length === 0) {
+                        musicGrid.innerHTML = '<div class="no-tracks">Нет аудиофайлов в Dropbox</div>';
+                        return;
+                    }
+                    
+                    renderTracks(audioFiles);
+                } else {
+                    musicGrid.innerHTML = '<div class="no-tracks">Папка пуста</div>';
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке треков:', error);
+                musicGrid.innerHTML = '<div class="no-tracks">Ошибка загрузки. Проверьте консоль для подробностей.</div>';
+            }
+        }
+        
+        function renderTracks(tracks) {
+            const musicGrid = document.getElementById('music-grid');
+            musicGrid.innerHTML = '';
+            
+            tracks.forEach(track => {
+                const trackCard = document.createElement('div');
+                trackCard.className = 'track-card';
+                
+                const directLink = `https://dl.dropboxusercontent.com/s/${track.id}/${track.name}`;
+                
+                trackCard.innerHTML = `
+                    <div class="track-title">${track.name.replace(/\.[^/.]+$/, "")}</div>
+                    <audio controls class="track-player">
+                        <source src="${directLink}" type="audio/mpeg">
+                        Ваш браузер не поддерживает аудио элемент.
+                    </audio>
+                `;
+                
+                musicGrid.appendChild(trackCard);
+            });
+        }
+        
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const trackCards = document.querySelectorAll('.track-card');
+            
+            trackCards.forEach(card => {
+                const title = card.querySelector('.track-title').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', fetchTracks);
+        
+        setInterval(fetchTracks, 300000);
+    </script>
+</body>
+</html>
